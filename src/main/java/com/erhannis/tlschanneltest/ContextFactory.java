@@ -65,8 +65,8 @@ public class ContextFactory {
             Key pvt = kp.getPrivate();
             
             ks.load(null, "password".toCharArray());
-            //X509Certificate cert = generateCertificate("CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown", kp, 1000, "SHA384withRSA");
-            X509Certificate cert = generateCertificate("CN="+UUID.randomUUID()+", OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown", kp, 1000, "SHA384withRSA");
+            X509Certificate cert = generateCertificate("CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown", kp, 1000, "SHA384withRSA");
+            //X509Certificate cert = generateCertificate("CN="+UUID.randomUUID()+", OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown", kp, 1000, "SHA384withRSA");
             ks.setKeyEntry("node", pvt, "password".toCharArray(), new Certificate[]{cert});
             FileOutputStream fos = new FileOutputStream(ksFile);
             ks.store(fos, "password".toCharArray());
@@ -129,7 +129,6 @@ public class ContextFactory {
                                 System.out.println("accepted");
                                 try {
                                     ts.setCertificateEntry(chain[0].getSubjectX500Principal().getName(), chain[0]);
-                                    //ts.setKeyEntry(chain[0].getSubjectX500Principal().getName(), chain[0].getPublicKey(), "password".toCharArray(), null);
                                     try (FileOutputStream fos = new FileOutputStream(truststore)) {
                                         ts.store(fos, "password".toCharArray());
                                         fos.flush();
@@ -176,7 +175,6 @@ public class ContextFactory {
                                 System.out.println("accepted");
                                 try {
                                     ts.setCertificateEntry(chain[0].getSubjectX500Principal().getName(), chain[0]);
-                                    //ts.setKeyEntry(chain[0].getSubjectX500Principal().getName(), chain[0].getPublicKey(), "password".toCharArray(), null);
                                     try (FileOutputStream fos = new FileOutputStream(truststore)) {
                                         ts.store(fos, "password".toCharArray());
                                         fos.flush();
