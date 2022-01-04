@@ -1,0 +1,3 @@
+keytool -genkey -keyalg RSA -alias lancopy_node_rsa -keystore selfsigned.jks -validity 1000 -keysize 4096
+keytool -export -keystore selfsigned.jks -alias lancopy_node_rsa -file lnr.cer
+keytool -import -file lnr2.cer -alias lancopy_node_rsa -keystore truststore.jks
