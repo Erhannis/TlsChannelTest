@@ -13,6 +13,7 @@ import javax.net.ssl.SSLContext;
 import tlschannel.ClientTlsChannel;
 import tlschannel.TlsChannel;
 
+// Derived from https://github.com/marianobarrios/tls-channel/tree/master/src/test/scala/tlschannel/example
 /** Client example. Connects to a public TLS reporting service. */
 public class SimpleBlockingClient {
 
@@ -36,9 +37,14 @@ public class SimpleBlockingClient {
       System.out.println("Connection outbound...");
       rawChannel.connect(new InetSocketAddress(domain, 10000));
 
-      // create TlsChannel builder, combining the raw channel and the SSLEngine, using minimal
-      // options
+      // create TlsChannel builder, combining the raw channel and the SSLEngine, using minimal options
       ClientTlsChannel.Builder builder = ClientTlsChannel.newBuilder(rawChannel, sslContext);
+      /*
+      // This is useful for seeing what cert(s) the client sent
+      builder.withSessionInitCallback(ssls -> {
+          ssls.getLocalCertificates();
+      });
+      */
 
       // instantiate TlsChannel
       try (TlsChannel tlsChannel = builder.build()) {

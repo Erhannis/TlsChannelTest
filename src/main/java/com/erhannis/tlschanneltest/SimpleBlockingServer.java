@@ -14,6 +14,7 @@ import javax.net.ssl.SSLEngine;
 import tlschannel.ServerTlsChannel;
 import tlschannel.TlsChannel;
 
+// Derived from https://github.com/marianobarrios/tls-channel/tree/master/src/test/scala/tlschannel/example
 /**
  * Server example. Accepts one connection and echos bytes sent by the client into standard output.
  *

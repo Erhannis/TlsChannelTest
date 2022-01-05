@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
@@ -14,6 +15,7 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.cert.CertPathValidatorException;
@@ -25,10 +27,12 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509TrustManager;
 import org.apache.commons.codec.digest.DigestUtils;
 import sun.security.x509.AlgorithmId;
@@ -41,6 +45,7 @@ import sun.security.x509.X500Name;
 import sun.security.x509.X509CertImpl;
 import sun.security.x509.X509CertInfo;
 
+// Derived from https://github.com/marianobarrios/tls-channel/tree/master/src/test/scala/tlschannel/example
 public class ContextFactory {
     public static class Context {
         public SSLContext sslContext;
@@ -65,8 +70,8 @@ public class ContextFactory {
             Key pvt = kp.getPrivate();
             
             ks.load(null, "password".toCharArray());
-            X509Certificate cert = generateCertificate("CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown", kp, 1000, "SHA384withRSA");
-            //X509Certificate cert = generateCertificate("CN="+UUID.randomUUID()+", OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown", kp, 1000, "SHA384withRSA");
+            //X509Certificate cert = generateCertificate("CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown", kp, 1000, "SHA384withRSA");
+            X509Certificate cert = generateCertificate("CN="+UUID.randomUUID()+", OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown", kp, 1000, "SHA384withRSA");
             ks.setKeyEntry("node", pvt, "password".toCharArray(), new Certificate[]{cert});
             FileOutputStream fos = new FileOutputStream(ksFile);
             ks.store(fos, "password".toCharArray());
@@ -196,6 +201,9 @@ public class ContextFactory {
                     }
                 }                
             };
+            
+            //FallbackX509ExtendedKeyManager km = new FallbackX509ExtendedKeyManager(kmf);
+            
             //sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
             //sslContext.init(kmf.getKeyManagers(), (TrustManager[]) MeUtils.concatArrays(tmf.getTrustManagers(), new TrustManager[] {tm}), null);
             ctx.sslContext.init(kmf.getKeyManagers(), new TrustManager[] {tm}, null);

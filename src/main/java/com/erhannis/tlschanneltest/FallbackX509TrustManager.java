@@ -92,12 +92,11 @@ public abstract class FallbackX509TrustManager implements X509TrustManager {
         }
     }
 
-    /*
-     * Merely pass this through.
-     */
     public X509Certificate[] getAcceptedIssuers() {
         if (pkixTrustManager != null) {
-            return pkixTrustManager.getAcceptedIssuers();
+            //return pkixTrustManager.getAcceptedIssuers();
+            // If we return accepted issuers, it prevents new clients from attempting to connect, because they have no matching keys
+            return new X509Certificate[0];
         } else {
             return new X509Certificate[0];
         }
