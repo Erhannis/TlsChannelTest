@@ -25,13 +25,13 @@ import tlschannel.TlsChannel;
 public class SimpleBlockingServer {
 
   private static final Charset utf8 = StandardCharsets.UTF_8;
+  public static final String message = "Server message to client\n";
 
   public static void main(String[] args) throws IOException, GeneralSecurityException {
 
     // initialize the SSLContext, a configuration holder, reusable object
     Context ctx = ContextFactory.authenticatedContext("TLSv1.3", "node_2.ks", "node_2.ts");
     SSLContext sslContext = ctx.sslContext;
-    //sslContext.createSSLEngine().setNeedClientAuth(true);
     
     // connect server socket channel normally
     try (ServerSocketChannel serverSocket = ServerSocketChannel.open()) {
@@ -44,18 +44,22 @@ public class SimpleBlockingServer {
         System.out.println("Local hash:");
         System.out.println(ctx.sha256Fingerprint);
 
-        // create TlsChannel builder, combining the raw channel and the SSLEngine, using minimal
-        // options
+        // create TlsChannel builder, combining the raw channel and the SSLEngine, using minimal options
         ServerTlsChannel.Builder builder = ServerTlsChannel.newBuilder(rawChannel, sslContext)
                 .withEngineFactory(sc -> {
                     SSLEngine se = sslContext.createSSLEngine();
                     se.setUseClientMode(false);
                     se.setNeedClientAuth(true);
+                    // Since we control both client and server, I'm restricting protocols to TLSv1.3 alone
+                    se.setEnabledProtocols(new String[] {"TLSv1.3"});
                     return se;
                 });
 
         // instantiate TlsChannel
         try (TlsChannel tlsChannel = builder.build()) {
+          // Careful; if the server and client both send at the same time without 
+          //tlsChannel.write(ByteBuffer.wrap(message.getBytes(StandardCharsets.US_ASCII)));
+          
           // write to stdout all data sent by the client
           ByteBuffer res = ByteBuffer.allocate(10000);
           while (tlsChannel.read(res) != -1) {
@@ -63,6 +67,8 @@ public class SimpleBlockingServer {
             System.out.print(utf8.decode(res).toString());
             res.compact();
           }
+          System.out.print(utf8.decode(res).toString());
+          res.compact();
         }
       }
     }

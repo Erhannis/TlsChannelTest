@@ -9,7 +9,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import tlschannel.ClientTlsChannel;
 import tlschannel.TlsChannel;
 
@@ -19,10 +22,9 @@ public class SimpleBlockingClient {
 
   private static final Charset utf8 = StandardCharsets.UTF_8;
 
-  public static final String domain = "localhost";//"www.howsmyssl.com";
-  public static final String httpLine =
-      "GET https://www.howsmyssl.com/a/check HTTP/1.0\nHost: www.howsmyssl.com\n\n";
-
+  public static final String domain = "localhost";
+  public static final String message = "Client message to server\n";
+  
   public static void main(String[] args) throws IOException, NoSuchAlgorithmException, GeneralSecurityException {
 
     // initialize the SSLContext, a configuration holder, reusable object
@@ -38,7 +40,11 @@ public class SimpleBlockingClient {
       rawChannel.connect(new InetSocketAddress(domain, 10000));
 
       // create TlsChannel builder, combining the raw channel and the SSLEngine, using minimal options
-      ClientTlsChannel.Builder builder = ClientTlsChannel.newBuilder(rawChannel, sslContext);
+      SSLEngine engine = sslContext.createSSLEngine();
+      engine.setUseClientMode(true);
+      // Since we control both client and server, I'm restricting protocols to TLSv1.3 alone
+      engine.setEnabledProtocols(new String[]{"TLSv1.3"});
+      ClientTlsChannel.Builder builder = ClientTlsChannel.newBuilder(rawChannel, engine);
       /*
       // This is useful for seeing what cert(s) the client sent
       builder.withSessionInitCallback(ssls -> {
@@ -48,14 +54,14 @@ public class SimpleBlockingClient {
 
       // instantiate TlsChannel
       try (TlsChannel tlsChannel = builder.build()) {
-
-        // do HTTP interaction and print result
-        tlsChannel.write(ByteBuffer.wrap(httpLine.getBytes(StandardCharsets.US_ASCII)));
+        tlsChannel.write(ByteBuffer.wrap(message.getBytes(StandardCharsets.US_ASCII)));
+        
+        // Server doesn't send a response, atm, fyi, but if it did, this should read it
         ByteBuffer res = ByteBuffer.allocate(10000);
-
-        // being HTTP 1.0, the server will just close the connection at the end
         while (tlsChannel.read(res) != -1) {
-          // empty
+          res.flip();
+          System.out.print(utf8.decode(res).toString());
+          res.compact();
         }
         res.flip();
         System.out.println(utf8.decode(res).toString());
