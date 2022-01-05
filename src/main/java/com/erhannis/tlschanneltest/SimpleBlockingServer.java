@@ -1,16 +1,27 @@
 package com.erhannis.tlschanneltest;
 
 import com.erhannis.tlschanneltest.ContextFactory.Context;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import tlschannel.ServerTlsChannel;
 import tlschannel.TlsChannel;
 
@@ -40,6 +51,9 @@ public class SimpleBlockingServer {
       // accept raw connections normally
       System.out.println("Waiting for connection...");
       try (SocketChannel rawChannel = serverSocket.accept()) {
+        // OR you could do it by hand! ;P
+        //ByteChannel rawChannel = new ConsoleChannel(); 
+        
         System.out.println("Connection inbound...");
         System.out.println("Local hash:");
         System.out.println(ctx.sha256Fingerprint);

@@ -4,6 +4,7 @@ import com.erhannis.tlschanneltest.ContextFactory.Context;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +39,8 @@ public class SimpleBlockingClient {
       System.out.println(ctx.sha256Fingerprint);
       System.out.println("Connection outbound...");
       rawChannel.connect(new InetSocketAddress(domain, 10000));
+      // Orrrr, if you're raring for a big bowl of unusually novel tedium....
+      //ByteChannel rawChannel = new ConsoleChannel();
 
       // create TlsChannel builder, combining the raw channel and the SSLEngine, using minimal options
       SSLEngine engine = sslContext.createSSLEngine();
